@@ -2,10 +2,28 @@
 __pycache__/
 *.pyc
 *.pyo
+.venv/
+venv/
+
+# Secrets / local config
+.env
+.env.*
+*.key
 
 # Runtime / logs (generated locally)
 logs/*
 !logs/.keep
+runtime/*
+!runtime/.keep
+!runtime/jobs/
 runtime/jobs/*
 !runtime/jobs/.keep
 *.log
+
+# Local outputs / temp files
+*.zip
+*.tmp
+*.temp
+~$*
+.DS_Store
+Thumbs.db
