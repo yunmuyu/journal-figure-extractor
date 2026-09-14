@@ -1,0 +1,14 @@
+当前重点回归样本：陈正斌《服务机器人多模态感知与实时决策融合方法研究》
+
+Word OOXML 中已核对到：
+图1 技术路线图 -> word/media/image4.emf
+图2 Actor-Critic双网络协同优化架构 -> word/media/image17.emf
+图3 TIAGo服务机器人实验平台 -> word/media/image19.png
+图4 不同场景下多模态注意力权重分布 -> word/media/image20.png
+
+v0.7 的问题：
+- 图2 走 PDF 矢量聚类，聚类向上吞入了正文“Critic通过最小化……”等内容。
+- 图4 依赖 PDF 图像层，Office 导出的对象层可能命中空白/占位层，最终出现白图。
+
+v0.9 的修复原则：
+优先按 Word 文档结构找到“图题紧邻的真实媒体/OLE预览对象”，直接导出；只有这一层失败才走 PDF。

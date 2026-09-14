@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>科技期刊图件提取与 AI 校对 · v1.2</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <div class="eyebrow">LOCAL EXTRACT · STRICT TEXT AUDIT · v1.2</div>
+      <h1>科技期刊图件提取与 AI 校对</h1>
+      <p>Word 原稿仍由本机 Microsoft Word 提取；只有你点击 AI 校对时，对应的“原稿图 + 重制图”才发送到所选视觉模型。Gemini 已移除。默认优先使用阿里云百炼 Qwen，网络/额度失败时可自动切到 Groq、OpenRouter Free。</p>
+    </header>
+
+    <section class="card">
+      <div class="step">01</div>
+      <h2>作者 Word 原稿</h2>
+      <p class="muted">支持 .doc / .docx。第一作者与文章标题从正文识别，不信任文件名。</p>
+      <label class="drop">
+        <input id="wordFolder" type="file" webkitdirectory directory multiple />
+        <strong>选择原稿 Word 文件夹</strong>
+        <span id="wordPicked">尚未选择</span>
+      </label>
+      <div class="stats" id="wordStats" hidden>
+        <span><b id="wordCount">0</b> 个 Word</span>
+        <button class="ghost mini" id="extractOnly" disabled>只提取原稿 ZIP</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="step">02</div>
+      <h2>重制图文件夹</h2>
+      <p class="muted">支持 PDF / JPG / JPEG / PNG。程序按“正文第一作者 + 图号”配对；例如 <code>艾晶-图3.pdf</code>。单篇文章时，仅有 <code>图3.pdf</code> 也能配。</p>
+      <label class="drop">
+        <input id="revisedFolder" type="file" webkitdirectory directory multiple />
+        <strong>选择重制图文件夹</strong>
+        <span id="revisedPicked">尚未选择</span>
+      </label>
+      <div class="stats" id="revisedStats" hidden>
+        <span><b id="revisedCount">0</b> 个 PDF/JPG/PNG</span>
+      </div>
+    </section>
+
+    <section class="card api-card">
+      <div class="step">03</div>
+      <h2>AI 服务与 API Key</h2>
+      <p class="muted">推荐只先配“阿里云百炼”。自动模式的降级顺序固定为：<b>百炼 → Groq → OpenRouter Free</b>；未配置 Key 的服务会自动跳过。Key 不写进网页源码，勾选保存时优先放进 Windows 凭据管理器。</p>
+
+      <div class="mode-row">
+        <label class="field">
+          <span>校对模式</span>
+          <select id="providerMode">
+            <option value="auto">自动模式（百炼 → Groq → OpenRouter）</option>
+            <option value="bailian">只用阿里云百炼</option>
+            <option value="groq">只用 Groq</option>
+            <option value="openrouter">只用 OpenRouter Free</option>
+          </select>
+        </label>
+        <div class="muted small mode-tip">自动模式只在 API/网络/额度失败时切换，不会因为某个模型给了 PASS/FAIL 就再调用第二个模型。</div>
+        <label class="field"><span>校对精度</span><select id="precisionMode"><option value="strict">精确双阶段（推荐：先逐字清点，再结构比对）</option><option value="fast">快速单阶段（省 Token，但更容易漏字）</option></select></label>
+        <div class="muted small mode-tip">精确模式会多调用一次 AI：第一阶段机械抄录两图文字，第二阶段再核对结构。只要文字库存无法完全对齐，后端禁止自动 PASS。</div>
+      </div>
+
+      <div class="provider-grid">
+        <section class="provider-card" data-provider="bailian">
+          <div class="provider-title"><b>① 阿里云百炼 Qwen</b><span class="pill neutral" id="status-bailian">未配置</span></div>
+          <p class="muted small">主服务。默认建议 qwen3.7-plus 做精确校对；也可切 qwen3.8-flash / 旧版 VL Flash。</p>
+          <label class="field"><span>模型</span><select id="model-bailian"><option value="qwen3.7-plus">qwen3.7-plus（精确校对推荐）</option><option value="qwen3.8-flash">qwen3.8-flash（更省）</option><option value="qwen3-vl-plus">qwen3-vl-plus（兼容旧账号）</option><option value="qwen3-vl-flash">qwen3-vl-flash（兼容旧账号）</option></select></label>
+          <label class="field"><span>API Key</span><input id="key-bailian" type="password" autocomplete="off" placeholder="sk-…" /></label>
+          <div class="api-actions"><button class="secondary" data-save="bailian">测试并保存</button><button class="ghost" data-clear="bailian">清除</button></div>
+          <div class="error provider-error" id="error-bailian" hidden></div>
+        </section>
+
+        <section class="provider-card" data-provider="groq">
+          <div class="provider-title"><b>② Groq Qwen</b><span class="pill neutral" id="status-groq">未配置</span></div>
+          <p class="muted small">高速备用。支持两图输入与 JSON，免费计划额度以 Groq 控制台为准。</p>
+          <label class="field"><span>模型</span><select id="model-groq"><option value="qwen/qwen3.8-27b">qwen/qwen3.8-27b（推荐）</option><option value="qwen/qwen3.6-27b">qwen/qwen3.6-27b</option></select></label>
+          <label class="field"><span>API Key</span><input id="key-groq" type="password" autocomplete="off" placeholder="gsk_…" /></label>
+          <div class="api-actions"><button class="secondary" data-save="groq">测试并保存</button><button class="ghost" data-clear="groq">清除</button></div>
+          <div class="error provider-error" id="error-groq" hidden></div>
+        </section>
+
+        <section class="provider-card" data-provider="openrouter">
+          <div class="provider-title"><b>③ OpenRouter Free</b><span class="pill neutral" id="status-openrouter">未配置</span></div>
+          <p class="muted small">最后兜底。<code>openrouter/free</code> 会在当时可用的免费视觉模型中路由，稳定性与判错尺度可能波动。</p>
+          <label class="field"><span>模型</span><select id="model-openrouter"><option value="openrouter/free">openrouter/free</option></select></label>
+          <label class="field"><span>API Key</span><input id="key-openrouter" type="password" autocomplete="off" placeholder="sk-or-v1-…" /></label>
+          <div class="api-actions"><button class="secondary" data-save="openrouter">测试并保存</button><button class="ghost" data-clear="openrouter">清除</button></div>
+          <div class="error provider-error" id="error-openrouter" hidden></div>
+        </section>
+      </div>
+      <label class="check persist-row"><input id="persistKey" type="checkbox" checked /> 将测试成功的 Key 保存到本机 Windows 凭据管理器</label>
+    </section>
+
+    <section class="card">
+      <div class="step">04</div>
+      <h2>提取并自动配对</h2>
+      <p class="muted">这一步不调用 AI。继续使用 v0.8 已验证的“Word 对象优先”提取逻辑，再将重制 PDF/JPG 渲染成图并按作者+图号配对。</p>
+      <div class="actions"><button id="prepare" disabled>提取并配对</button><span id="prepareStatus" class="muted small"></span></div>
+      <div class="progress" id="prepareProgress" hidden><div class="bar"><i></i></div></div>
+      <div class="error" id="prepareError" hidden></div>
+      <div id="pairSummary" class="summary" hidden></div>
+      <div id="unmatched" class="warning-box" hidden></div>
+    </section>
+
+    <section class="card results-card" id="resultsCard" hidden>
+      <div class="step">05</div>
+      <div class="results-head">
+        <div><h2>原稿 ｜ 重制图 ｜ AI 结论</h2><p class="muted">FAIL / REVIEW 会列出具体位置、原稿内容与重制内容；每张结果同时记录实际使用的服务与模型。</p></div>
+        <div class="actions compact"><button id="compareAll">开始全部 AI 校对</button><button id="stopCompare" class="ghost" disabled>停止</button><button id="exportReport" class="secondary">下载结果 ZIP</button></div>
+      </div>
+      <div id="aiProgress" class="ai-progress muted"></div>
+      <div id="pairs" class="pairs"></div>
+    </section>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>

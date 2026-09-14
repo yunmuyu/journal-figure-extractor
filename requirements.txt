@@ -1,0 +1,4 @@
+Flask>=3.1,<4
+PyMuPDF>=1.26
+pywin32>=310
+Pillow>=11.0

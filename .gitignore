@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Runtime / logs (generated locally)
+logs/*
+!logs/.keep
+runtime/jobs/*
+!runtime/jobs/.keep
+*.log
