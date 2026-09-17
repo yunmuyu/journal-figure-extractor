@@ -8,7 +8,7 @@ from pathlib import Path
 
 import bootstrap as b
 
-b.APP_VERSION = "1.3"
+b.APP_VERSION = "1.4"
 
 
 def start_progress_server(vpy: Path) -> int:
