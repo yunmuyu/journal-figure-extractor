@@ -1,10 +1,10 @@
 @echo off
 setlocal EnableExtensions
 cd /d "%~dp0"
-title Journal Figure Extractor v0.9
+title Journal Figure Extractor v1.3
 
 echo ============================================================
-echo Journal Figure Extractor v0.9
+echo Journal Figure Extractor v1.3
 echo ============================================================
 echo.
 
@@ -36,7 +36,7 @@ if not defined PYEXE (
 )
 
 echo Python candidate: %PYEXE%
-"%PYEXE%" "%CD%\bootstrap.py"
+"%PYEXE%" "%CD%\bootstrap_progress.py"
 set "RC=%ERRORLEVEL%"
 if not "%RC%"=="0" (
   echo.
