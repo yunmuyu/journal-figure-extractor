@@ -1,10 +1,10 @@
 @echo off
 setlocal EnableExtensions
 cd /d "%~dp0"
-title Journal Figure Extractor v1.3
+title Journal Figure Extractor v1.4
 
 echo ============================================================
-echo Journal Figure Extractor v1.3
+echo Journal Figure Extractor v1.4
 echo ============================================================
 echo.
 
