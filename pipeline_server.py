@@ -26,7 +26,9 @@ _PIPELINES: dict[str, dict[str, Any]] = {}
 _PIPE_LOCK = threading.RLock()
 _JOB_FILE_LOCK = threading.RLock()
 _WORD_LOCAL = threading.local()
-_CACHE_ROOT = Path(core.ROOT) / "runtime" / "pipeline_cache_v15"
+# Newer app.py exposes ROOT; fall back to this file's directory for older cores (e.g. v1.2).
+_CORE_ROOT = getattr(core, "ROOT", None) or Path(__file__).resolve().parent
+_CACHE_ROOT = Path(_CORE_ROOT) / "runtime" / "pipeline_cache_v15"
 _CACHE_WORD = _CACHE_ROOT / "word"
 _CACHE_REVISED = _CACHE_ROOT / "revised"
 for _d in (_CACHE_WORD, _CACHE_REVISED):
